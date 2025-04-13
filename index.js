@@ -1,14 +1,18 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import userSchema from "./model/userSchema.js";
-
+import authRoutes from './routes/authRoutes.js';
+  // Importez le modèle complet, pas le schéma
+import cors from 'cors';
+import morgan from 'morgan';
+import eventRoutes from'./routes/eventRoutes.js'
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 6000;
 const MONGO_URI = process.env.MONGO_URI;
-
+app.use(cors());
+app.use(morgan('dev'));
 // Connexion à MongoDB
 mongoose
   .connect(MONGO_URI)
@@ -17,7 +21,6 @@ mongoose
 
 app.use(express.json());
 
-const User = mongoose.model("User", userSchema);
 
 // Route test
 app.get("/", (req, res) => {
@@ -25,17 +28,10 @@ app.get("/", (req, res) => {
 });
 
 // Route pour récupérer un utilisateur
-app.get("/users/:username", async (req, res) => {
-  try {
-    const user = await User.findOne({ username: req.params.username });
-    if (!user) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
-    }
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: "Erreur serveur", error });
-  }
-});
+app.use('/', authRoutes);
+// route events
+app.use('/events',eventRoutes);
+
 
 // Démarrer le serveur
 app.listen(PORT, () =>
