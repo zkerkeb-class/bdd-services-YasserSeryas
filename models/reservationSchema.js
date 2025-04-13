@@ -120,4 +120,4 @@ reservationSchema.methods.cancel = async function () {
 };
 
 const Reservation = mongoose.model("Reservation", reservationSchema);
-module.exports = Reservation;
+export default Reservation;

@@ -80,4 +80,4 @@ ticketTypeSchema.methods.reduceQuantity = async function (amount) {
 };
 
 const TicketType = mongoose.model("TicketType", ticketTypeSchema);
-module.exports = TicketType;
+export default TicketType;

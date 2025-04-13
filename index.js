@@ -1,11 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import authRoutes from './routes/authRoutes.js';
-  // Importez le modèle complet, pas le schéma
 import cors from 'cors';
 import morgan from 'morgan';
 import eventRoutes from'./routes/eventRoutes.js'
+import authRoutes from './routes/authRoutes.js';
+import reservationRoutes from './routes/reservationRoutes.js'
 dotenv.config();
 
 const app = express();
@@ -31,6 +31,8 @@ app.get("/", (req, res) => {
 app.use('/', authRoutes);
 // route events
 app.use('/events',eventRoutes);
+// route reservation
+app.use('/reservation',reservationRoutes)
 
 
 // Démarrer le serveur

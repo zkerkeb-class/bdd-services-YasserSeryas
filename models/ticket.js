@@ -130,4 +130,4 @@ ticketSchema.methods.transferTo = function (newOwnerId) {
 };
 
 const Ticket = mongoose.model("Ticket", ticketSchema);
-module.exports = Ticket;
+export default Ticket;
