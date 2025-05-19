@@ -113,5 +113,16 @@ paymentSchema.methods.refund = async function (amount, reason) {
   return this.save();
 };
 
+paymentSchema.statics.findById = function (id) {
+  return this.findOne({ _id: id });
+};
+
+
+// Export nommé de la fonction (statique)
+
+
+
+
 const Payment = mongoose.model("Payment", paymentSchema);
-module.exports = Payment;
+export const findById = Payment.findById.bind(Payment);
+export default Payment;

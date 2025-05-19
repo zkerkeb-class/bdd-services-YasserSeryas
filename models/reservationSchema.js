@@ -118,6 +118,11 @@ reservationSchema.methods.cancel = async function () {
     );
   }
 };
+// Méthode statique pour retrouver une réservation par son ID
+reservationSchema.statics.findById = function (id) {
+  return this.findOne({ _id: id });
+};
 
 const Reservation = mongoose.model("Reservation", reservationSchema);
+export const findById = Reservation.findById.bind(Reservation);
 export default Reservation;

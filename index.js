@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import eventRoutes from'./routes/eventRoutes.js'
 import authRoutes from './routes/authRoutes.js';
 import reservationRoutes from './routes/reservationRoutes.js'
+import paymentRoutes from './routes/paymentRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -33,7 +34,8 @@ app.use('/', authRoutes);
 app.use('/events',eventRoutes);
 // route reservation
 app.use('/reservation',reservationRoutes)
-
+// Route pour gérer les paiements
+ app.use('/payments', paymentRoutes);
 
 // Démarrer le serveur
 app.listen(PORT, () =>
