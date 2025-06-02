@@ -7,6 +7,7 @@ import eventRoutes from'./routes/eventRoutes.js'
 import authRoutes from './routes/authRoutes.js';
 import reservationRoutes from './routes/reservationRoutes.js'
 import paymentRoutes from './routes/paymentRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -36,7 +37,8 @@ app.use('/events',eventRoutes);
 app.use('/reservation',reservationRoutes)
 // Route pour gérer les paiements
  app.use('/payments', paymentRoutes);
-
+// route notification
+app.use('/api/notifications', notificationRoutes);
 // Démarrer le serveur
 app.listen(PORT, () =>
   console.log(`📡 Service BDD en écoute sur le port ${PORT}`)
