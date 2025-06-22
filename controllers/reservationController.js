@@ -1,6 +1,6 @@
 import Reservation from '../models/reservationSchema.js';
-import Ticket from '../models/Ticket.js';
-import TicketType from '../models/TicketType.js';
+import Ticket from '../models/ticket.js';
+import TicketType from '../models/ticketType.js';
 import Event from '../models/eventSchema.js';
 import asyncHandler from 'express-async-handler';
 
@@ -124,3 +124,71 @@ export const cancelReservation = asyncHandler(async (req, res) => {
   
   res.json({ message: 'Réservation annulée avec succès' });
 });
+// import Reservation from '../models/reservationSchema.js';
+// import Event from '../models/eventSchema.js';
+// import TicketType from '../models/ticketType.js';
+// import Ticket from '../models/ticket.js';
+// import mongoose from 'mongoose';
+
+// export class ReservationService {
+//   static async createReservation(userId, eventId, ticketTypeId, quantity) {
+//     const session = await mongoose.startSession();
+//     session.startTransaction();
+    
+//     try {
+//       // Vérifications
+//       const event = await Event.findById(eventId).session(session);
+//       if (!event) {
+//         throw new Error('Événement non trouvé');
+//       }
+      
+//       const ticketType = await TicketType.findById(ticketTypeId).session(session);
+//       if (!ticketType) {
+//         throw new Error('Type de billet non trouvé');
+//       }
+      
+//       if (ticketType.quantity < quantity) {
+//         throw new Error('Quantité de billets insuffisante');
+//       }
+      
+//       // Créer la réservation
+//       const reservation = new Reservation({
+//         user: userId,
+//         event: eventId,
+//         totalAmount: ticketType.price * quantity
+//       });
+      
+//       await reservation.save({ session });
+      
+//       // Créer les billets
+//       const tickets = [];
+//       for (let i = 0; i < quantity; i++) {
+//         const ticket = new Ticket({
+//           event: eventId,
+//           ticketType: ticketTypeId,
+//           owner: userId,
+//           reservation: reservation._id,
+//           price: ticketType.price
+//         });
+//         await ticket.save({ session });
+//         tickets.push(ticket);
+//       }
+      
+//       // Mettre à jour les quantités
+//       ticketType.quantity -= quantity;
+//       await ticketType.save({ session });
+      
+//       await event.updateRemainingCapacity();
+      
+//       await session.commitTransaction();
+      
+//       return { reservation, tickets };
+      
+//     } catch (error) {
+//       await session.abortTransaction();
+//       throw error;
+//     } finally {
+//       session.endSession();
+//     }
+//   }
+// }

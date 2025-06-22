@@ -7,7 +7,7 @@ const createPaymentValidation = Joi.object({
   paymentDetails: Joi.object({
     cardLast4: Joi.string(),
     cardBrand: Joi.string(),
-    paypalEmail:Joi. string().email(),
+    paypalEmail: Joi.string().email(),
     bankAccount: Joi.string()
   })
 });

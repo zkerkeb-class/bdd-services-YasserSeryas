@@ -55,10 +55,10 @@ const eventSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 1,
-    },
-    remainingCapacity: {
+    },    remainingCapacity: {
       type: Number,
       required: true,
+      default: function() { return this.totalCapacity; }
     },
     status: {
       type: String,
@@ -88,6 +88,14 @@ const eventSchema = new mongoose.Schema(
 eventSchema.methods.isSoldOut = function () {
   return this.remainingCapacity <= 0;
 };
+
+// Initialiser remainingCapacity avant la sauvegarde
+eventSchema.pre('save', function(next) {
+  if (this.isNew && !this.remainingCapacity) {
+    this.remainingCapacity = this.totalCapacity;
+  }
+  next();
+});
 
 // Méthode pour mettre à jour la capacité restante
 eventSchema.methods.updateRemainingCapacity = async function () {

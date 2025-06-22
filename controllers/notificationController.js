@@ -1,6 +1,6 @@
 import Notification from '../models/notification.js';
+
 class NotificationController {
-  // Créer une nouvelle notification
   async createNotification(req, res) {
     try {
       console.log('📥 Réception d\'une demande de création de notification:', req.body);
@@ -9,23 +9,26 @@ class NotificationController {
         type,
         recipient,
         subject,
-        content,
-        template,
+         template,
+        content = `Notification ${template} pour ${recipient}`,
         templateData,
         priority,
         scheduledFor,
         metadata
       } = req.body;
 
-      // Validation basique
       if (!type || !recipient || !content || !template) {
+        const missingFields = [];
+        if (!type) missingFields.push('type');
+        if (!recipient) missingFields.push('recipient');
+        if (!content) missingFields.push('content');
+        if (!template) missingFields.push('template');
         return res.status(400).json({
           success: false,
-          message: 'Champs requis manquants: type, recipient, content, template'
+          message: `Champs requis manquants: ${missingFields.join(', ')}`
         });
       }
 
-      // Créer la notification
       const notification = new Notification({
         type,
         recipient,
@@ -65,7 +68,6 @@ class NotificationController {
     }
   }
 
-  // Récupérer toutes les notifications
   async getAllNotifications(req, res) {
     try {
       const {
@@ -76,16 +78,15 @@ class NotificationController {
         userId
       } = req.query;
 
-      // Construire le filtre
       const filter = {};
       if (status) filter.status = status;
       if (type) filter.type = type;
       if (userId) filter['metadata.userId'] = userId;
 
-      // Pagination
       const skip = (page - 1) * limit;
 
-      const notifications = await find(filter)
+      // ✅ CORRECTION - Ajouter "Notification." avant find
+      const notifications = await Notification.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit));
@@ -113,13 +114,13 @@ class NotificationController {
     }
   }
 
-  // Mettre à jour le statut d'une notification
   async updateNotificationStatus(req, res) {
     try {
       const { id } = req.params;
       const { status, failureReason, sentAt } = req.body;
 
-      const notification = await findById(id);
+      // ✅ CORRECTION - Ajouter "Notification." avant findById
+      const notification = await Notification.findById(id);
       
       if (!notification) {
         return res.status(404).json({
@@ -128,7 +129,6 @@ class NotificationController {
         });
       }
 
-      // Mettre à jour les champs
       if (status) notification.status = status;
       if (failureReason) notification.failureReason = failureReason;
       if (sentAt) notification.sentAt = new Date(sentAt);

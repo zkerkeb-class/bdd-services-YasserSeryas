@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-// Modèle PromoCode
 const Schema = mongoose.Schema;
 
 const promoCodeSchema = new mongoose.Schema(
@@ -92,7 +91,7 @@ const promoCodeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Méthode pour vérifier la validité du code
+// Méthodes du schéma...
 promoCodeSchema.methods.isValid = function () {
   const now = new Date();
   return (
@@ -103,7 +102,6 @@ promoCodeSchema.methods.isValid = function () {
   );
 };
 
-// Méthode pour appliquer la réduction
 promoCodeSchema.methods.applyDiscount = function (originalAmount) {
   if (this.discountType === "montant") {
     return Math.max(0, originalAmount - this.discountAmount);
@@ -114,7 +112,6 @@ promoCodeSchema.methods.applyDiscount = function (originalAmount) {
   return originalAmount;
 };
 
-// Incrémenter le compteur d'utilisation
 promoCodeSchema.methods.incrementUsage = function () {
   if (this.maxUses && this.timesUsed >= this.maxUses) {
     throw new Error(
@@ -125,17 +122,14 @@ promoCodeSchema.methods.incrementUsage = function () {
   return this.save();
 };
 
-// Vérifier l'éligibilité de l'utilisateur
 promoCodeSchema.methods.isUserEligible = function (user) {
   return (
     !this.applicableUserRoles || this.applicableUserRoles.includes(user.role)
   );
 };
 
-// Index pour les recherches par code
 promoCodeSchema.index({ code: 1 }, { unique: true });
 
-// Pré-valider les dates avant sauvegarde
 promoCodeSchema.pre("validate", function (next) {
   if (this.endDate && this.endDate <= this.startDate) {
     next(new Error("La date de fin doit être postérieure à la date de début"));
@@ -145,4 +139,5 @@ promoCodeSchema.pre("validate", function (next) {
 });
 
 const PromoCode = mongoose.model("PromoCode", promoCodeSchema);
-module.exports = PromoCode;
+// ✅ CORRECTION - Utiliser export default au lieu de module.exports
+export default PromoCode;
