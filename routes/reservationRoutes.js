@@ -3,6 +3,8 @@ import { protect } from '../middlewares/auth.js';
 import validate from '../middlewares/validate.js';
 import { createReservationValidation } from '../validations/reservationValidation.js';
 import { conditionalReservationLimit } from '../middlewares/conditionalRateLimit.js';
+import { cacheConfig } from '../middlewares/redisCache.js';
+import { invalidateReservationsCache } from '../middlewares/cacheInvalidation.js';
 import { 
   createReservation, 
   getMyReservations, 
@@ -99,8 +101,8 @@ const router = express.Router();
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.route('/')
-  .get(protect, getMyReservations)
-  .post(conditionalReservationLimit, protect, validate(createReservationValidation), createReservation);
+  .get(protect, cacheConfig.reservations, getMyReservations)
+  .post(conditionalReservationLimit, invalidateReservationsCache, protect, validate(createReservationValidation), createReservation);
 
 /**
  * @swagger
@@ -141,7 +143,7 @@ router.route('/')
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.route('/:id')
-  .get(protect, getReservationById);
+  .get(protect, cacheConfig.reservations, getReservationById);
 
 /**
  * @swagger
@@ -191,6 +193,6 @@ router.route('/:id')
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.route('/:id/cancel')
-  .put(protect, cancelReservation);
+  .put(invalidateReservationsCache, protect, cancelReservation);
 
 export default router;

@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { protect, authorize } from '../middlewares/auth.js';
-import { getGeneralLimiter } from '../middlewares/rateLimiter.js';
+import { conditionalGeneralLimit } from '../middlewares/conditionalRateLimit.js';
+import { cacheConfig } from '../middlewares/redisCache.js';
+import { invalidateTicketsCache } from '../middlewares/cacheInvalidation.js';
 import validate from '../middlewares/validate.js';
 import { transferTicketValidation } from '../validations/ticketValidation.js';
 import {
@@ -44,7 +46,7 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/my', protect, getUserTickets);
+router.get('/my', conditionalGeneralLimit, protect, cacheConfig.tickets, getUserTickets);
 
 /**
  * @swagger
@@ -93,7 +95,7 @@ router.get('/my', protect, getUserTickets);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:id', protect, getTicketById);
+router.get('/:id', conditionalGeneralLimit, protect, cacheConfig.tickets, getTicketById);
 
 /**
  * @swagger
@@ -147,7 +149,8 @@ router.get('/:id', protect, getTicketById);
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.put('/:id/validate', 
-  getGeneralLimiter,
+  conditionalGeneralLimit,
+  invalidateTicketsCache,
   protect, 
   authorize('organisateur', 'administrateur'), 
   validateTicket
@@ -228,6 +231,8 @@ router.put('/:id/validate',
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.put('/:id/transfer', 
+  conditionalGeneralLimit,
+  invalidateTicketsCache,
   protect,
   validate(transferTicketValidation), 
   transferTicket

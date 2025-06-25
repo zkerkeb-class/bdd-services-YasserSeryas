@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { protect, authorize } from '../middlewares/auth.js';
-import { getGeneralLimiter } from '../middlewares/rateLimiter.js';
+import { conditionalGeneralLimit } from '../middlewares/conditionalRateLimit.js';
+import { cacheConfig } from '../middlewares/redisCache.js';
+import { invalidateTicketTypesCache } from '../middlewares/cacheInvalidation.js';
 import validate from '../middlewares/validate.js';
 import { 
   createTicketTypeValidation, 
@@ -56,7 +58,7 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/event/:eventId', getEventTicketTypes);
+router.get('/event/:eventId', conditionalGeneralLimit, cacheConfig.ticketTypes, getEventTicketTypes);
 
 /**
  * @swagger
@@ -140,7 +142,8 @@ router.get('/event/:eventId', getEventTicketTypes);
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/', 
-  getGeneralLimiter,
+  conditionalGeneralLimit,
+  invalidateTicketTypesCache,
   protect, 
   authorize('organisateur', 'administrateur'),
   validate(createTicketTypeValidation), 
@@ -265,6 +268,8 @@ router.post('/',
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.put('/:id', 
+  conditionalGeneralLimit,
+  invalidateTicketTypesCache,
   protect, 
   authorize('organisateur', 'administrateur'),
   validate(updateTicketTypeValidation), 
@@ -272,6 +277,8 @@ router.put('/:id',
 );
 
 router.delete('/:id', 
+  conditionalGeneralLimit,
+  invalidateTicketTypesCache,
   protect, 
   authorize('organisateur', 'administrateur'), 
   deleteTicketType

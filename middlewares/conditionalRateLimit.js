@@ -5,7 +5,8 @@ import {
   getPaymentLimiter, 
   getNotificationLimiter,
   getEventReadLimiter,
-  getEventCreateLimiter 
+  getEventCreateLimiter,
+  getGeneralLimiter
 } from './rateLimiter.js';
 
 // Middleware conditionnel pour appliquer le rate limiting seulement si Redis est disponible
@@ -28,3 +29,4 @@ export const conditionalPaymentLimit = conditionalRateLimit(getPaymentLimiter);
 export const conditionalNotificationLimit = conditionalRateLimit(getNotificationLimiter);
 export const conditionalEventReadLimit = conditionalRateLimit(getEventReadLimiter);
 export const conditionalEventCreateLimit = conditionalRateLimit(getEventCreateLimiter);
+export const conditionalGeneralLimit = conditionalRateLimit(getGeneralLimiter);

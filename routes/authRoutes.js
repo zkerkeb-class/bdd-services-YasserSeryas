@@ -1,6 +1,8 @@
 import express from "express";
 import { getUserByEmail, createUser,getUserById } from "../controllers/authController.js";
 import { conditionalAuthLimit } from "../middlewares/conditionalRateLimit.js";
+import { cacheConfig } from "../middlewares/redisCache.js";
+import { invalidateUsersCache } from "../middlewares/cacheInvalidation.js";
 import validate from "../middlewares/validate.js";
 import { registerValidation } from "../validations/authValidation.js";
 
@@ -42,8 +44,8 @@ const router = express.Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get("/users/:email", conditionalAuthLimit, getUserByEmail);
-router.get("/users/by-id/:id", conditionalAuthLimit, getUserById);
+router.get("/users/:email", conditionalAuthLimit, cacheConfig.auth, getUserByEmail);
+router.get("/users/by-id/:id", conditionalAuthLimit, cacheConfig.auth, getUserById);
 /**
  * @swagger
  * /api/auth/users:
@@ -108,6 +110,6 @@ router.get("/users/by-id/:id", conditionalAuthLimit, getUserById);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post("/users", conditionalAuthLimit, validate(registerValidation), createUser);
+router.post("/users", conditionalAuthLimit, invalidateUsersCache, validate(registerValidation), createUser);
 
 export default router;

@@ -1,7 +1,9 @@
 import { Router } from 'express';
 const router = Router();
 import NotificationController from '../controllers/notificationController.js';
-import { getNotificationLimiter } from '../middlewares/rateLimiter.js';
+import { conditionalNotificationLimit } from '../middlewares/conditionalRateLimit.js';
+import { cacheConfig } from '../middlewares/redisCache.js';
+import { invalidateGenericCache } from '../middlewares/cacheInvalidation.js';
 
 /**
  * @swagger
@@ -110,8 +112,8 @@ import { getNotificationLimiter } from '../middlewares/rateLimiter.js';
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/', NotificationController.createNotification);
-router.get('/', NotificationController.getAllNotifications);
+router.post('/', conditionalNotificationLimit, invalidateGenericCache(['notifications'], ['api:GET:/api/notifications*']), NotificationController.createNotification);
+router.get('/', conditionalNotificationLimit, cacheConfig.notifications, NotificationController.getAllNotifications);
 
 /**
  * @swagger
@@ -172,6 +174,6 @@ router.get('/', NotificationController.getAllNotifications);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:id/status', NotificationController.updateNotificationStatus);
+router.put('/:id/status', conditionalNotificationLimit, invalidateGenericCache(['notifications'], ['api:GET:/api/notifications*']), NotificationController.updateNotificationStatus);
 
 export default router;

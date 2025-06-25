@@ -4,7 +4,9 @@ import { protect, authorize } from '../middlewares/auth.js';
 import validate from '../middlewares/validate.js';
 import paymentValidation from '../validations/paymentValidation.js';
 import paymentController from '../controllers/paymentController.js';
-import { getPaymentLimiter } from '../middlewares/rateLimiter.js';
+import { conditionalPaymentLimit } from '../middlewares/conditionalRateLimit.js';
+import { cacheConfig } from '../middlewares/redisCache.js';
+import { invalidateGenericCache } from '../middlewares/cacheInvalidation.js';
 const { createPayment, getPaymentById, refundPayment } = paymentController;
 const  { createPaymentValidation, refundValidation } = paymentValidation;
 
@@ -85,7 +87,7 @@ const  { createPaymentValidation, refundValidation } = paymentValidation;
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.route('/')
-  .post(getPaymentLimiter, protect, validate(createPaymentValidation), createPayment);
+  .post(conditionalPaymentLimit, invalidateGenericCache(['payments'], ['api:GET:/api/payments*']), protect, validate(createPaymentValidation), createPayment);
 
 /**
  * @swagger
@@ -126,7 +128,7 @@ router.route('/')
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.route('/:id')
-  .get(protect, getPaymentById);
+  .get(protect, cacheConfig.payments, getPaymentById);
 
 /**
  * @swagger
@@ -187,6 +189,7 @@ router.route('/:id')
  */
 router.route('/:id/refund')
   .put(
+    invalidateGenericCache(['payments'], ['api:GET:/api/payments*']),
     protect,
     authorize('admin'),
     validate(refundValidation),

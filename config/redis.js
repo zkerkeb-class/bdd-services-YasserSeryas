@@ -55,4 +55,9 @@ const disconnectRedis = async () => {
   }
 };
 
-export { redisClient, connectRedis, disconnectRedis };
+// Getter pour le client Redis
+const getRedisClient = () => {
+  return redisClient;
+};
+
+export { redisClient, connectRedis, disconnectRedis, getRedisClient };

@@ -5,7 +5,8 @@ import cors from 'cors';
 import morgan from 'morgan';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { connectRedis, disconnectRedis } from './config/redis.js';
-import { getGeneralLimiter, initializeRateLimiters } from './middlewares/rateLimiter.js';
+import { initializeRateLimiters } from './middlewares/rateLimiter.js';
+import { conditionalGeneralLimit } from './middlewares/conditionalRateLimit.js';
 import { getRedisStats, redisHealthCheck } from './middlewares/redisMonitoring.js';
 import { specs, swaggerUi } from './config/swagger.js';
 import eventRoutes from './routes/eventRoutes.js'
@@ -15,6 +16,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import ticketRoutes from './routes/ticketRoutes.js';
 import ticketTypeRoutes from './routes/ticketTypeRoutes.js';
+import cacheRoutes from './routes/cacheRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -54,18 +56,8 @@ connectRedis()
     isRedisReady = false;
   });
 
-// Middleware conditionnel pour le rate limiting
-app.use((req, res, next) => {
-  if (isRedisReady) {
-    try {
-      const limiter = getGeneralLimiter();
-      return limiter(req, res, next);
-    } catch (error) {
-      console.warn('⚠️ Rate limiter non disponible:', error.message);
-    }
-  }
-  next();
-});
+// Middleware conditionnel pour le rate limiting global
+app.use(conditionalGeneralLimit);
 
 // Routes principales (toujours disponibles)
 app.get("/", (req, res) => {
@@ -145,6 +137,8 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/tickets', ticketRoutes);
 // Routes pour la gestion des types de billets
 app.use('/api/ticket-types', ticketTypeRoutes);
+// Routes pour la gestion du cache Redis
+app.use('/api/cache', cacheRoutes);
 
 // Middleware de gestion d'erreurs
 app.use(errorHandler);
