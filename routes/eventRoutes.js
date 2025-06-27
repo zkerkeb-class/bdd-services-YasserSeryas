@@ -1,18 +1,22 @@
-import express from 'express'
+import express from "express";
 const router = express.Router();
-import { protect, authorize  } from '../middlewares/auth.js';
-import  { createEventValidation }  from '../validations/eventValidation.js';
-import  validate from '../middlewares/validate.js';
-import { conditionalEventReadLimit, conditionalEventCreateLimit } from '../middlewares/conditionalRateLimit.js';
-import { cacheConfig } from '../middlewares/redisCache.js';
-import { invalidateEventsCache } from '../middlewares/cacheInvalidation.js';
+import { protect, authorize } from "../middlewares/auth.js";
+import { createEventValidation } from "../validations/eventValidation.js";
+import validate from "../middlewares/validate.js";
+import {
+  conditionalEventReadLimit,
+  conditionalEventCreateLimit,
+} from "../middlewares/conditionalRateLimit.js";
+import { cacheConfig } from "../middlewares/redisCache.js";
+import { invalidateEventsCache } from "../middlewares/cacheInvalidation.js";
 import {
   getEvents,
   getEvent,
-  getEventWithPricing,     
+  getMyEvents,
+  getEventWithPricing,
   createEvent,
-  updateEvent
-}from '../controllers/eventController.js';
+  updateEvent,
+} from "../controllers/eventController.js";
 
 /**
  * @swagger
@@ -178,16 +182,64 @@ import {
  *         $ref: '#/components/responses/InternalServerError'
  */
 router
-  .route('/')
+  .route("/")
   .get(conditionalEventReadLimit, cacheConfig.events, getEvents)
   .post(
     conditionalEventCreateLimit,
     invalidateEventsCache,
     protect,
-    authorize('organisateur','administrateur'),
+    authorize("organisateur", "administrateur"),
     validate(createEventValidation),
     createEvent
   );
+/**
+ * @swagger
+ * /api/events/my:
+ *   get:
+ *     summary: Récupérer mes événements
+ *     description: Liste tous les événements créés par l'utilisateur connecté avec statistiques
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Événements de l'organisateur récupérés avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 allOf:
+ *                   - $ref: '#/components/schemas/Event'
+ *                   - type: object
+ *                     properties:
+ *                       stats:
+ *                         type: object
+ *                         properties:
+ *                           totalTickets:
+ *                             type: number
+ *                             example: 500
+ *                           soldTickets:
+ *                             type: number
+ *                             example: 150
+ *                           availableTickets:
+ *                             type: number
+ *                             example: 350
+ *                           ticketTypes:
+ *                             type: number
+ *                             example: 3
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.get(
+  "/my",
+  conditionalEventReadLimit,
+  protect,
+  cacheConfig.events,
+  getMyEvents
+);
 
 /**
  * @swagger
@@ -253,7 +305,12 @@ router
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:id/pricing', conditionalEventReadLimit, cacheConfig.events, getEventWithPricing);
+router.get(
+  "/:id/pricing",
+  conditionalEventReadLimit,
+  cacheConfig.events,
+  getEventWithPricing
+);
 
 /**
  * @swagger
@@ -293,7 +350,7 @@ router.get('/:id/pricing', conditionalEventReadLimit, cacheConfig.events, getEve
  *         $ref: '#/components/responses/TooManyRequests'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
- * 
+ *
  *   put:
  *     summary: Modifier un événement
  *     description: Permet aux organisateurs et administrateurs de modifier un événement existant
@@ -350,12 +407,12 @@ router.get('/:id/pricing', conditionalEventReadLimit, cacheConfig.events, getEve
  *         $ref: '#/components/responses/InternalServerError'
  */
 router
-  .route('/:id')
-  .get(conditionalEventReadLimit, cacheConfig.events, getEvent)  
+  .route("/:id")
+  .get(conditionalEventReadLimit, cacheConfig.events, getEvent)
   .put(
     invalidateEventsCache,
     protect,
-    authorize('organisateur', 'administrateur'),
+    authorize("organisateur", "administrateur"),
     validate(createEventValidation),
     updateEvent
   );
