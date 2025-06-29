@@ -1,0 +1,56 @@
+{
+  "name": "bdd-services-yasserseryas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",  "scripts": {
+    "test": "node test-setup.js --run-tests",
+    "test:setup": "node test-setup.js",
+    "test:journeys": "node test-user-journeys.js",
+    "test:auth": "node test-createUser.js",
+    "test:redis": "node test-redis.js",
+    "test:pricing": "node test-pricing-features.js",
+    "test:cache": "node test-cache-system.js",
+    "test:cache:simple": "node test-cache-simple.js",
+    "test:monitoring": "node test-redis-monitoring.js",
+    "check:redis": "node check-redis-limiters.js",
+    "check:cache": "node check-cache-coverage.js",
+    "cache:monitor": "node cache-monitor.js monitor",
+    "cache:stats": "node cache-monitor.js stats",
+    "cache:cleanup": "node cache-monitor.js cleanup",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zkerkeb-class/bdd-services-YasserSeryas.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zkerkeb-class/bdd-services-YasserSeryas/issues"
+  },
+  "homepage": "https://github.com/zkerkeb-class/bdd-services-YasserSeryas#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "express-async-handler": "^1.2.0",
+    "express-rate-limit": "^7.5.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.13.3",
+    "pg-hstore": "^2.3.4",
+    "qrcode": "^1.5.4",
+    "rate-limit-redis": "^4.2.1",
+    "redis": "^5.5.5",
+    "sequelize": "^6.37.5",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
