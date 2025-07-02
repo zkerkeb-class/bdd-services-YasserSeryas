@@ -6,7 +6,26 @@ import asyncHandler from "express-async-handler";
 // @route   GET /api/events
 // @access  Public
 const getEvents = asyncHandler(async (req, res) => {
-  const events = await Event.find().populate("organizer", "firstName lastName");
+  // Extraire les paramètres de filtrage
+  const { category, location, minPrice_gte, minPrice_lte } = req.query;
+  
+  // Construire l'objet de filtres pour MongoDB
+  const filters = {};
+  
+  if (category) {
+    filters.category = category;
+  }
+  
+  if (location) {
+    // Recherche dans le nom du lieu ou la ville
+    filters.$or = [
+      { "location.name": { $regex: location, $options: "i" } },
+      { "location.address.city": { $regex: location, $options: "i" } }
+    ];
+  }
+
+  // Récupérer les événements avec les filtres appliqués
+  const events = await Event.find(filters).populate("organizer", "firstName lastName");
 
   // Pour chaque événement, récupérer le prix le moins cher disponible
   const eventsWithMinPrice = await Promise.all(
@@ -26,8 +45,34 @@ const getEvents = asyncHandler(async (req, res) => {
     })
   );
 
-  res.json(eventsWithMinPrice);
+  // Filtrer par prix si spécifié
+  let filteredEvents = eventsWithMinPrice;
+  
+  if (minPrice_gte || minPrice_lte) {
+    filteredEvents = eventsWithMinPrice.filter(event => {
+      const price = event.minPrice;
+      
+      // Si l'événement n'a pas de prix (gratuit), on considère le prix comme 0
+      const eventPrice = price !== null ? price : 0;
+      
+      let matchesMinPrice = true;
+      let matchesMaxPrice = true;
+      
+      if (minPrice_gte) {
+        matchesMinPrice = eventPrice >= parseFloat(minPrice_gte);
+      }
+      
+      if (minPrice_lte) {
+        matchesMaxPrice = eventPrice <= parseFloat(minPrice_lte);
+      }
+      
+      return matchesMinPrice && matchesMaxPrice;
+    });
+  }
+
+  res.json(filteredEvents);
 });
+
 
 // @desc    Get single event
 // @route   GET /api/events/:id
