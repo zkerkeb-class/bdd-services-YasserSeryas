@@ -25,7 +25,7 @@ export const initializeRateLimiters = (redisClient) => {
       prefix: 'rl:general:'
     }),
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 1000,
     message: {
       error: 'Trop de requêtes depuis cette IP, veuillez réessayer plus tard.',
       retryAfter: '15 minutes'
@@ -77,7 +77,7 @@ export const initializeRateLimiters = (redisClient) => {
       prefix: 'rl:payment:'
     }),
     windowMs: 5 * 60 * 1000,
-    max: 2,
+    max: 10, // Limite stricte pour éviter les abus
     message: {
       error: 'Limite de paiements atteinte, veuillez patienter avant de réessayer.',
       retryAfter: '5 minutes'

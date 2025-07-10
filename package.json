@@ -19,7 +19,7 @@
     "cache:stats": "node cache-monitor.js stats",
     "cache:cleanup": "node cache-monitor.js cleanup",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "npx nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -52,5 +52,8 @@
     "sequelize": "^6.37.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }

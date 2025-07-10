@@ -7,12 +7,69 @@ import paymentController from '../controllers/paymentController.js';
 import { conditionalPaymentLimit } from '../middlewares/conditionalRateLimit.js';
 import { cacheConfig } from '../middlewares/redisCache.js';
 import { invalidateGenericCache } from '../middlewares/cacheInvalidation.js';
-const { createPayment, getPaymentById, refundPayment } = paymentController;
-const  { createPaymentValidation, refundValidation } = paymentValidation;
+
+const { createPayment, getAllPayments, getPaymentById, refundPayment, updatePayment } = paymentController;
+const { createPaymentValidation, refundValidation } = paymentValidation;
 
 /**
  * @swagger
  * /api/payments:
+ *   get:
+ *     summary: Récupérer tous les paiements
+ *     description: Liste des paiements (admin voit tous, utilisateur voit ses propres paiements)
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Numéro de page
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Nombre d'éléments par page
+ *     responses:
+ *       200:
+ *         description: Liste des paiements récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 payments:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Payment'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                       example: 1
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 5
+ *                     totalPayments:
+ *                       type: integer
+ *                       example: 47
+ *                     hasNext:
+ *                       type: boolean
+ *                       example: true
+ *                     hasPrev:
+ *                       type: boolean
+ *                       example: false
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  *   post:
  *     summary: Créer un paiement
  *     description: Traite un paiement pour une réservation
@@ -87,6 +144,7 @@ const  { createPaymentValidation, refundValidation } = paymentValidation;
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.route('/')
+  .get(protect, cacheConfig.payments, getAllPayments)
   .post(conditionalPaymentLimit, invalidateGenericCache(['payments'], ['api:GET:/api/payments*']), protect, validate(createPaymentValidation), createPayment);
 
 /**
@@ -195,5 +253,7 @@ router.route('/:id/refund')
     validate(refundValidation),
     refundPayment
   );
+// PUT /api/payments/:id
+router.put('/:id', protect, updatePayment);
 
 export default router;

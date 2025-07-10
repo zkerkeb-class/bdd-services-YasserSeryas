@@ -2,6 +2,8 @@ import Joi from 'joi';
 
 const createPaymentValidation = Joi.object({
   reservationId: Joi.string().required(),
+  amount: Joi.number().positive().required(),
+  currency: Joi.string().default('EUR'),
   paymentMethod: Joi.string().valid('carte_credit', 'paypal', 'virement', 'especes', 'autre').required(),
   transactionId: Joi.string().required(),
   paymentDetails: Joi.object({

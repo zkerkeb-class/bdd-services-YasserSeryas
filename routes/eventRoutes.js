@@ -16,6 +16,7 @@ import {
   getEventWithPricing,
   createEvent,
   updateEvent,
+  updateEventStatus,getPublishedEvents
 } from "../controllers/eventController.js";
 
 /**
@@ -240,7 +241,7 @@ router.get(
   cacheConfig.events,
   getMyEvents
 );
-
+router.get('/published', getPublishedEvents);
 /**
  * @swagger
  * /api/events/{id}/pricing:
@@ -416,5 +417,8 @@ router
     validate(createEventValidation),
     updateEvent
   );
+
+  router.put('/:id/status', protect, authorize('organisateur', 'admin'), updateEventStatus);
+  
 
 export default router;

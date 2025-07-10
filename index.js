@@ -28,7 +28,7 @@ if (!MONGO_URI) {
   console.error("❌ MONGO_URI non définie dans les variables d'environnement");  process.exit(1);
 }
 
- app.use(cors());
+ app.use(cors('*')); // Autoriser toutes les origines pour le développement
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
